@@ -1,6 +1,7 @@
-# Fano Web Framework Skeleton Application
+# Example FastCGI Web Application with Fano Web Framework
 
-Web application skeleton using Fano Framework, Pascal web application framework
+FastCGI Web application skeleton using Fano Framework, Pascal web application framework. This application is listen to Unix Domain Socket.
+
 
 This project is generated using [Fano CLI](https://github.com/fanoframework/fano-cli)
 command line tools to help scaffolding web application using Fano Framework.
@@ -120,11 +121,30 @@ environment variable. By default is `app.cgi` filename.
 
 ## Run
 
+Run example Fano FastCGI application
+
+```
+$ ./public/app.cgi
+```
+
+By default it will listen on Unix domain socket `/tmp/fano-fcgi-unix.sock` file.
+You need to make sure `/tmp/fano-fcgi-unix.sock` permission is writeable
+by web server.
+
 ### Run with a webserver
 
 Setup a virtual host. Please consult documentation of web server you use.
 
-For example on Apache,
+#### Apache
+
+You need to use Apache 2.4 and to have `mod_proxy_fcgi` installed and loaded. This module is Apache's built-in module, so it is very likely that you will have it with your Apache installation. You just need to make sure it is loaded. For example, on Debian,
+
+```
+$ sudo a2enmod proxy_fcgi
+$ sudo systemctl restart apache2
+```
+
+Create virtual host config and add `ProxyPassMatch`, for example
 
 ```
 <VirtualHost *:80>
@@ -135,60 +155,43 @@ For example on Apache,
          Options +ExecCGI
          AllowOverride FileInfo
          Require all granted
-         DirectoryIndex app.cgi
-         AddHandler cgi-script .cgi
      </Directory>
+
+    ProxyRequests Off
+    ProxyPass /css !
+    ProxyPass /images !
+    ProxyPass /js !
+    ProxyPassMatch ^/(.*)$ "unix:/tmp/fano-fcgi-unix.sock|fcgi://127.0.0.1"
 </VirtualHost>
 ```
-On Apache, you will need to enable CGI module, such as `mod_cgi` or `mod_cgid`. If CGI module not loaded, above virtual host will cause `app.cgi` is downloaded instead of executed.
+Last four line of virtual host configurations basically tell Apache to serve any
+files inside `css`, `images`, `js` directly otherwise pass it to our application.
 
-For example, on Debian, this will enable `mod_cgi` module.
+Hostname after `fcgi://` are ignored by `mod_proxy_fcgi`.
+
+On Debian, save it to `/etc/apache2/sites-available` for example as `fano-fcgi-unix.conf`
+Enable this site and restart Apache
 
 ```
-$ sudo a2enmod cgi
+$ sudo a2ensite fano-fcgi-unix.conf
 $ sudo systemctl restart apache2
 ```
 
-Depending on your server setup, for example, if  you use `.htaccess`, add following code:
+If Apache returns `HTTP 503 Service Unavailable` and you get following similar messages in error log
 
 ```
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ app.cgi [L]
-</IfModule>
-```
-and put `.htaccess` file in same directory as `app.cgi` file (i.e., in `public` directory).
-
-Content of `.htaccess` basically tells Apache to serve existing files/directories directly. For any non-existing files/directories, pass them to our application.
-
-### Simulate run on command line
-
-```
-$ cd public
-$ REQUEST_METHOD=GET \
-  REQUEST_URI=/test/test \
-  SERVER_NAME=juhara.com \
-  ./app.cgi
+[Fri Jun 28 15:46:52.111034 2019] [proxy:error] [pid 18974] (13)Permission denied: AH02454: FCGI: attempt to connect to Unix domain socket /tmp/fano-fcgi-unix.sock (127.0.0.1) failed
 ```
 
-`tools/simulate.run.sh` is bash script that can be used to simplify simulating run
-application in shell.
+then make sure that socket file is writeable by user where Apache runs.
 
-    $ ./tools/simulate.run.sh
+If you get following message when running application,
 
-or to change route to access, set `REQUEST_URI` variable.
+```
+ESocketError: Binding of socket failed: /tmp/fano-fcgi/fano-fcgi-unix.sock
+```
 
-    $ REQUEST_URI=/test/test ./tools/simulate.run.sh
-
-This is similar to simulating browser requesting this page,for example,
-
-    $ wget -O- http://[your fano app hostname]/test/test
-
-However, running using `tools/simulate.run.sh` allows you to view output of `heaptrc`
-unit for detecting memory leak (if you enable `-gh` switch in `build.dev.cfg`).
-
+Delete `/tmp/fano-fcgi/fano-fcgi-unix.sock` first then re-run application.
 
 ## Deployment
 

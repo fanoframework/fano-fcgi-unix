@@ -5,24 +5,27 @@
  * @copyright Copyright (c) [[COPYRIGHT_YEAR]] [[COPYRIGHT_HOLDER]]
  * @license   [[LICENSE_URL]] ([[LICENSE]])
  *------------------------------------------------------------- *)
-program app;
+unit HomeView;
+
+interface
+
+{$MODE OBJFPC}
+{$H+}
 
 uses
 
-    fano,
-    bootstrap;
+    fano;
 
-var
-    appInstance : IWebApplication;
-
-begin
-    writeln('Starting application at /tmp/fano-fcgi/fano-fcgi-unix.sock');
+type
 
     (*!-----------------------------------------------
-     * Bootstrap FastCGI application
+     * View instance
      *
-     * @author AUTHOR_NAME <author@email.tld>
+     * @author [[AUTHOR_NAME]] <[[AUTHOR_EMAIL]]>
      *------------------------------------------------*)
-    appInstance := TBootstrapApp.create('/tmp/fano-fcgi/fano-fcgi-unix.sock');
-    appInstance.run();
+    THomeView = class(TStaticView)
+    end;
+
+implementation
+
 end.
