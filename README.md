@@ -193,6 +193,8 @@ ESocketError: Binding of socket failed: /tmp/fano-fcgi/fano-fcgi-unix.sock
 
 Delete `/tmp/fano-fcgi/fano-fcgi-unix.sock` first then re-run application.
 
+If you run Debian 9 based distribution, each user now has private /tmp directory, which may cause problem because Apache cannot find our socket file.
+
 ## Deployment
 
 You need to deploy only executable binary and any supporting files such as HTML templates, images, css stylesheets, application config.
