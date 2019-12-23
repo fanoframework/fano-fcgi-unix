@@ -23,6 +23,14 @@ begin
      *
      * @author AUTHOR_NAME <author@email.tld>
      *------------------------------------------------*)
-    appInstance := TBootstrapApp.create('/tmp/fano-fcgi-unix.sock');
+    appInstance := TDaemonWebApplication.create(
+        TFastCgiAppServiceProvider.create(
+            TServerAppServiceProvider.create(
+                TMyAppServiceProvider.create(),
+                TUnixSocketSvr.create('/tmp/fano-fcgi-unix.sock')
+            )
+        ),
+        TMyAppRoutes.create()
+    );
     appInstance.run();
 end.
