@@ -27,7 +27,7 @@ begin
         TFastCgiAppServiceProvider.create(
             TServerAppServiceProvider.create(
                 TMyAppServiceProvider.create(),
-                TUnixSocketSvr.create('/tmp/fano-fcgi-unix.sock')
+                (TUnixSvrFactory.create('/tmp/fano-fcgi-unix.sock') as ISocketSvrFactory).build()
             )
         ),
         TMyAppRoutes.create()
