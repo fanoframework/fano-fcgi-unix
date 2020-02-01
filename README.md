@@ -13,30 +13,12 @@ command line tools to help scaffolding web application using Fano Framework.
 - Web Server (Apache, nginx)
 - [Fano Web Framework](https://github.com/fanoframework/fano)
 
-## Installation
-
-### Build
-
-#### libcurl development package installation
-
-Check if libcurl package for development is installed by running `curl-config`.
+## TLDR
 
 ```
-$ curl-config --version
-```
-If libcurl installed you will get something like `libcurl x.xx.x` where `x.xx.x` is version. For example `libcurl 7.47.0` otherwise you get
-
-```
-The program 'curl-config' can be found in the following packages:
- * libcurl4-gnutls-dev
- * libcurl4-nss-dev
- * libcurl4-openssl-dev
-Try: sudo apt install <selected package>
-```
-
-In case libcurl not installed, run
-```
-$ sudo apt install libcurl4-gnutls-dev
+$ git clone git@github.com:fanofamework/fano-app.git --recursive
+$ ./tools/config.setup.sh
+$ ./build.sh
 ```
 
 ### Free Pascal installation
@@ -85,7 +67,7 @@ configuration files. Following shell command is similar to command above.
     $ ./tools/config.setup.sh
     $ ./build.sh
 
-By default, it will output binary executable in `public` directory.
+By default, it will output binary executable in `bin` directory.
 
 ### Build for different environment
 
@@ -108,7 +90,7 @@ If `BUILD_TYPE` environment variable is not set, production environment will be 
 ## Change executable output directory
 
 Compilation will output executable to directory defined in `EXEC_OUTPUT_DIR`
-environment variable. By default is `public` directory.
+environment variable. By default is `bin` directory.
 
     $ EXEC_OUTPUT_DIR=/path/to/public/dir ./build.sh
 
@@ -124,7 +106,7 @@ environment variable. By default is `app.cgi` filename.
 Run example Fano FastCGI application
 
 ```
-$ ./public/app.cgi
+$ ./bin/app.cgi
 ```
 
 By default it will listen on Unix domain socket `/tmp/fano-fcgi-unix.sock` file.
@@ -193,7 +175,10 @@ ESocketError: Binding of socket failed: /tmp/fano-fcgi/fano-fcgi-unix.sock
 
 Delete `/tmp/fano-fcgi/fano-fcgi-unix.sock` first then re-run application.
 
-If you run Debian 9 based distribution, each user now has private /tmp directory, which may cause problem because Apache cannot find our socket file.
+If you run Debian 9 based distribution, each user now has private /tmp directory, which may cause problem because Apache cannot find our socket file. The easiest workaround to this problem for development machine is just to edit `/etc/systemd/system/apache2.service`
+and replace `PrivateTmp=true` with `PrivateTmp=false` and restart Apache service.
+
+The proper way is of course to setup socket file which accessible both our application and web server unsing for example shell script.
 
 ## Deployment
 
